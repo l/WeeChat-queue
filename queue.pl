@@ -8,39 +8,57 @@ use strict;
 use warnings;
 
 weechat::register("queue", "AYANOKOUZI, Ryuunosuke", "0.1.0", "GPL3", "command queuing", "", "");
-weechat::hook_timer(10 * 1000, 0, 0, "worker", "");
+weechat::hook_timer(100 * 1000, 0, 0, "worker", "");
 
 weechat::hook_command(
-	"showqueue",
-	"show queue",
-	"",
-	"",
-	"",
-	"showqueue",
-	"",
-);
+	"queue",
+	"queue management for any weechat command, message to some buffer, erc...",
+	"[|[list|del]|[add command]]",
+	"
+   list: show queue subcommand
+    del: shift queue subcommand
+    add: push queue subcommand
+command: any weechat command
 
-weechat::hook_command(
-	"enqueue",
-	"push queue",
-	"command",
-	"command: weechat command",
-	"",
-	"enqueue",
-	"",
-);
-
-weechat::hook_command(
-	"dequeue",
-	"shift queue",
-	"",
-	"",
-	"",
-	"dequeue",
+Examples:
+/queue
+        Synonymous with `/queue list'
+/queue list
+        Display a list of commands on queue.
+/queue del
+        Delete 1st command from queue.
+/queue add /msg #weechat Hi, there!
+        Add command `/msg #weechat Hi, there!' to queue.
+/queue add hello weechat!
+        Add command `hello weechat!' to queue.
+        Messsage `hello weechat!' will send from the buffer.
+",
+	"list||del||add",
+	"queue",
 	"",
 );
 
 my @queue = ();
+
+sub queue
+{
+	my $data = shift;
+	my $buffer = shift;
+	my ($subcommand, $args) = split / /, shift, 2;
+	if (! $subcommand) {
+		$subcommand = 'list';
+	}
+	if ($subcommand eq 'list') {
+		&showqueue($data, $buffer, $args);
+	} elsif ($subcommand eq 'add') {
+		&enqueue($data, $buffer, $args);
+	} elsif ($subcommand eq 'del') {
+		&dequeue($data, $buffer, $args);
+	} else {
+		weechat::print("", "ERROR: unregistered subcommand '$subcommand`");
+	}
+	return weechat::WEECHAT_RC_OK;
+}
 
 sub dequeue
 {
