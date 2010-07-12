@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 
-weechat::register("queue", "AYANOKOUZI, Ryuunosuke", "0.1.0", "GPL3", "command queueing", "", "");
+weechat::register("queue", "AYANOKOUZI, Ryuunosuke", "0.1.0", "GPL3", "command queuing", "", "");
 weechat::hook_timer(10 * 1000, 0, 0, "worker", "");
 
 weechat::hook_command(
