@@ -6,12 +6,15 @@
 
 use strict;
 use warnings;
+use Data::Dumper;
 
-weechat::register("queue", "AYANOKOUZI, Ryuunosuke", "0.1.0", "GPL3", "command queuing", "", "");
-weechat::hook_timer(100 * 1000, 0, 0, "worker", "");
-
+my @queue = ();
+my $conf = &configure();
+my $script_name = "queue";
+weechat::register($script_name, "AYANOKOUZI, Ryuunosuke", "0.1.1", "GPL3", "command queuing", "", "");
+weechat::hook_config("plugins.var.perl.$script_name.*", "config_cb", "");
 weechat::hook_command(
-	"queue",
+	$script_name,
 	"queue management for any weechat command, message to some buffer, erc...",
 	"[|[list|del]|[add command]]",
 	"
@@ -32,13 +35,53 @@ Examples:
 /queue add hello weechat!
         Add command `hello weechat!' to queue.
         Messsage `hello weechat!' will send from the buffer.
+
+Vars:
+/set plugins.var.perl.$script_name.interval 100000
+        set interval between two calls by millisecond units.
+/set plugins.var.perl.$script_name.align_second 0
+        set alignment on a second. 
+/set plugins.var.perl.$script_name.max_calls 10
+        set number of calls to timer (if 0, then timer has no end)
 ",
 	"list||del||add",
 	"queue",
 	"",
 );
 
-my @queue = ();
+sub config_cb
+{
+	my $data = shift;
+	my $option = shift;
+	my $value = shift;
+#	weechat::print('', Dumper $data);
+#	weechat::print('', Dumper $option);
+#	weechat::print('', Dumper $value);
+#	weechat::print('', Dumper $conf);
+	if ($conf->{hook}) {
+		weechat::unhook($conf->{hook});
+	}
+	$conf = &configure();
+#	weechat::print('', Dumper $conf);
+	return weechat::WEECHAT_RC_OK;
+}
+
+sub configure
+{
+	my $conf = {
+		interval => 100*1000,
+		align_second => 0,
+		max_calls => 10,
+	};
+	while (my ($key, $val) = each %{$conf}) {
+		if (!weechat::config_is_set_plugin($key)) {
+			weechat::config_set_plugin($key, $val);
+		}
+		$conf->{$key} = weechat::config_get_plugin($key);
+	}
+	$conf->{hook} = weechat::hook_timer($conf->{interval}, $conf->{align_second}, $conf->{max_calls}, "worker", "");
+	return $conf;
+}
 
 sub queue
 {
