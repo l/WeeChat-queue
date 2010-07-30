@@ -6,13 +6,12 @@
 
 use strict;
 use warnings;
-#use Data::Dumper;
 
 weechat::register("queue", "AYANOKOUZI, Ryuunosuke", "0.1.2", "GPL3", "command queuing", "", "");
 my $script_name = "queue";
 weechat::hook_config("plugins.var.perl.$script_name.*", "config_cb", "");
 weechat::hook_command(
-	"$script_name",
+	$script_name,
 	"queue management for any weechat command, message to some buffer, erc...",
 	"[|[list|del]|[add command]]",
 	"
@@ -54,15 +53,10 @@ sub config_cb
 	my $data = shift;
 	my $option = shift;
 	my $value = shift;
-#	weechat::print('', Dumper $data);
-#	weechat::print('', Dumper $option);
-#	weechat::print('', Dumper $value);
-#	weechat::print('', Dumper $conf);
 	if ($conf->{hook}) {
 		weechat::unhook($conf->{hook});
 	}
 	$conf = &configure();
-#	weechat::print('', Dumper $conf);
 	return weechat::WEECHAT_RC_OK;
 }
 
