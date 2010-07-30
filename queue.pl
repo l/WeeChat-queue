@@ -8,13 +8,11 @@ use strict;
 use warnings;
 #use Data::Dumper;
 
-my @queue = ();
-my $conf = &configure();
+weechat::register("queue", "AYANOKOUZI, Ryuunosuke", "0.1.2", "GPL3", "command queuing", "", "");
 my $script_name = "queue";
-weechat::register($script_name, "AYANOKOUZI, Ryuunosuke", "0.1.1", "GPL3", "command queuing", "", "");
 weechat::hook_config("plugins.var.perl.$script_name.*", "config_cb", "");
 weechat::hook_command(
-	$script_name,
+	"$script_name",
 	"queue management for any weechat command, message to some buffer, erc...",
 	"[|[list|del]|[add command]]",
 	"
@@ -48,6 +46,8 @@ Vars:
 	"queue",
 	"",
 );
+my @queue = ();
+my $conf = &configure();
 
 sub config_cb
 {
