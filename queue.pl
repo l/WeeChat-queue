@@ -6,7 +6,7 @@
 
 use strict;
 use warnings;
-use Data::Dumper;
+#use Data::Dumper;
 
 my @queue = ();
 my $conf = &configure();
